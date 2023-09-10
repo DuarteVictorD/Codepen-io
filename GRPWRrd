@@ -1,0 +1,660 @@
+<!DOCTYPE html>
+<html lang="en" >
+
+<head>
+  <meta charset="UTF-8">
+  
+
+    <link rel="apple-touch-icon" type="image/png" href="https://cpwebassets.codepen.io/assets/favicon/apple-touch-icon-5ae1a0698dcc2402e9712f7d01ed509a57814f994c660df9f7a952f3060705ee.png" />
+
+    <meta name="apple-mobile-web-app-title" content="CodePen">
+
+    <link rel="shortcut icon" type="image/x-icon" href="https://cpwebassets.codepen.io/assets/favicon/favicon-aec34940fbc1a6e787974dcd360f2c6b63348d4b1f4e06c77743096d55480f33.ico" />
+
+    <link rel="mask-icon" type="image/x-icon" href="https://cpwebassets.codepen.io/assets/favicon/logo-pin-b4b4269c16397ad2f0f7a01bcdf513a1994f4c94b8af2f191c09eb0d601762b1.svg" color="#111" />
+
+
+
+  
+    <script src="https://cpwebassets.codepen.io/assets/common/stopExecutionOnTimeout-2c7831bb44f98c1391d6a4ffda0e1fd302503391ca806e7fcc7b9b87197aec26.js"></script>
+
+
+  <title>CodePen - Song cue cards - VT demo</title>
+
+    <link rel="canonical" href="https://codepen.io/una/pen/GRPWRrd">
+  
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/meyer-reset/2.0/reset.min.css">
+
+  
+  
+<style>
+/* Put new transition name on each card to morph each */
+.card-1 {
+  view-transition-name: card-1;
+}
+
+.card-2 {
+  view-transition-name: card-2;
+}
+
+.card-3 {
+  view-transition-name: card-3;
+}
+
+.card-4 {
+  view-transition-name: card-4;
+}
+
+.card-5 {
+  view-transition-name: card-5;
+}
+
+.card-6 {
+  view-transition-name: card-6;
+}
+
+.card-7 {
+  view-transition-name: card-7;
+}
+
+
+/* Etc. */
+* {
+  box-sizing: border-box;
+}
+
+body {
+  display: grid;
+  height: 100dvh;
+  place-items: center;
+  padding: 2rem;
+  background: #11161a;
+}
+
+.cards {
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  width: 100%;
+  gap: 1.5rem;
+  padding: 2rem;
+}
+
+.card {
+  width: 100%;
+  aspect-ratio: 2/3;
+  position: relative;
+  background: #272a2d;
+  color: white;
+  padding: 1cqi;
+  font-family: 'Roboto', system-ui;
+  
+  /*  Hero card  */
+   &:first-child {
+    aspect-ratio: 4 / 2;
+    grid-column: 1 / -1;
+     
+     .content {
+        grid-template-columns: 1fr 1fr;
+        gap: 2rem;
+      }
+     
+     @media (width <= 450px) {
+       aspect-ratio: 1 / 2;
+       
+      /*    Not working     */
+       .content {
+         grid-template-columns: 1fr;
+         gap: 0;
+       }
+     }
+     
+    & button {
+      width: 4rem;
+      height: 4rem;
+      margin: 0;
+      top: 50%;
+      left: -1.5rem;
+    }
+
+    &::after {
+      content: 'Now playing';
+      display: block;
+      position: absolute;
+      top: -1rem;
+      left: -1rem;
+      padding: 1rem;
+      background: green;
+    }
+     
+     .extra {
+       display: block;
+     }
+  }
+  
+  /*  Upcoming  */
+  &:nth-child(2)::after {
+      content: 'Up next';
+      display: block;
+      position: absolute;
+      top: -0.5rem;
+      left: -0.5rem;
+      padding: 0.5rem;
+      background: darkgreen;
+    }
+}
+
+.delete-btn {
+  position: absolute;
+  width: 2.5rem;
+  height: 2.5rem;
+  padding: 0.25rem;
+  border: 4px solid #11161a;
+  border-radius: 100%;
+  background: #51516d;
+  color: white;
+  bottom: -1.5rem;
+  margin: 0 auto;
+  left: 0; right: 0;
+
+  & img {
+    filter: invert();
+  }
+}
+
+.sr-only {
+  border: 0;
+  clip: rect(1px, 1px, 1px, 1px);
+  clip-path: inset(50%);
+  height: 1px;
+  margin: -1px;
+  overflow: hidden;
+  padding: 0;
+  position: absolute;
+  width: 1px;
+  white-space: nowrap;
+}
+
+.content {
+  display: grid;
+  grid-template-rows: auto 1fr;
+  height: 100%;
+  
+  & img,
+  & figure {
+    width: 100%;
+    aspect-ratio: 1;
+  }
+  
+  .meta {
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    padding: 0.5rem 0;
+    container-type: size;
+  }
+  
+  .song {
+    font-size: 14cqi;
+    font-weight: 800;
+  }
+  
+  .artist {
+    font-size: 8cqi;
+  }
+}
+
+.extra {
+  display: none;
+  font-size: 10cqi;
+  font-weight: 200;
+}
+</style>
+
+  <script>
+  window.console = window.console || function(t) {};
+  var consoleWarn = window.console.warn;
+  function warn(){ consoleWarn.apply(console, arguments); }
+  window.open = function(){ warn("window.open is disabled."); };
+  window.print   = function(){ warn("window.print is disabled."); };
+  window.alert   = function(){ warn("window.alert is disabled."); };
+  window.confirm = function(){ warn("window.confirm is disabled."); };
+  window.prompt  = function(){ warn("window.prompt is disabled."); };
+  window.Notification = function() { warn("HTML5 notifications are disabled."); };
+  function noop(){}
+  Object.keys(window.console).map(function(key){
+    window.console[key] = noop
+  });
+</script>
+
+  
+    <script>
+    (function() {
+      /*
+      * Capture all errors for this pen
+      **/
+      window.onerror = function(/* message, file, line */) {
+        return true;
+      };
+
+      /*
+      * Capture and kill Web Audio and Speech
+      */
+      if (typeof (AudioContext) != "undefined" || typeof (webkitAudioContext) != "undefined") {
+        AudioContext = function() {
+          return false;
+        };
+
+        webkitAudioContext = function() {
+          return false;
+        };
+      }
+
+      if (typeof (mozAudioContext) != "undefined") {
+        mozAudioContext = function() {
+          return false;
+        };
+      }
+
+      if ("speechSynthesis" in window) {
+        window.speechSynthesis = {};
+      }
+      if ("speak" in speechSynthesis) {
+        speechSynthesis.speak = function() {
+          return false;
+        };
+      }
+
+      // Kill the browser asking for access to the video cam or audio
+      navigator.getUserMedia = function() {
+      };
+      navigator.mozGetUserMedia = function() {
+      };
+      navigator.webkitGetUserMedia = function() {
+      };
+      navigator.mediaDevices.getUserMedia = function() {
+      };
+
+
+      /**
+      * Capture and kill animations after X number of seconds
+      **/
+      var __animationDuration = 4000;
+      var __animationsTimedOut = false;
+      var __animationRequests = [];
+      var __requestAnimationFrame = false;
+      var __cancelAnimationFrame = false;
+      var x, i;
+
+      var vendorsRequestAnimationFrame = [
+        "requestAnimationFrame",
+        "mozRequestAnimationFrame",
+        "webkitRequestAnimationFrame"
+      ];
+
+      // find the browsers requestAnimationFrame and cancelAnimationFrame
+      for (x = 0; x < vendorsRequestAnimationFrame.length; x++) {
+        if (!__requestAnimationFrame) {
+          __requestAnimationFrame = window[vendorsRequestAnimationFrame[x]
+          ];
+        }
+      }
+
+      __cancelAnimationFrame = window.cancelAnimationFrame || window.mozCancelAnimationFrame;
+
+      // Wrap the requestAnimationFrame so we can stop it in the future
+      function __reqFrame(callback, element) {
+        // after the timeout we no longer take requests
+        var timerID;
+        if (__animationsTimedOut) {
+          return 0;
+        } else {
+          timerID = __requestAnimationFrame(callback, element);
+          __animationRequests.push(timerID);
+
+          return timerID;
+        }
+      }
+
+      for (x = 0; x < vendorsRequestAnimationFrame.length; x++) {
+        window[vendorsRequestAnimationFrame[x]] = __reqFrame;
+      }
+
+      // Cancel the animations after expiration
+      setTimeout(function() {
+        for (i = 0; i < __animationRequests.length; i++) {
+          __cancelAnimationFrame(__animationRequests[i]);
+        }
+
+        var ss = window.document.createElement("style");
+        ss.textContent = "*, *::before, *::after { animation-play-state: paused !important; }";
+        var ref = window.document.getElementsByTagName("script")[0];
+        ref.parentNode.insertBefore(ss, ref);
+
+        __animationsTimedOut = true;
+      }, __animationDuration, "push");
+
+      /**
+      * Capture setInterval and setTimeout to kill after X number of seconds
+      **/
+      window.setInterval = (function(oldSetInterval) {
+        var registered = [];
+
+        function f(a,b) {
+          // check if the time has expired,
+          // after __animationDuration expires don't take anymore setIntervals
+          if (this.timedOut) {
+            return 0;
+          } else {
+            return registered[ registered.length ] = oldSetInterval(a,b);
+          }
+        }
+
+        f.clearAll = function() {
+          var r;
+
+          while (r = registered.pop()) {
+            clearInterval( r );
+          }
+
+          this.timedOut = true;
+        };
+
+        f.timedOut = false;
+
+        return f;
+      }(window.setInterval));
+
+      window.setTimeout = (function(oldSetTimeout) {
+        var registered = [];
+
+        // because some of our timeouts may time out afterwards
+        // we want to make sure they know the secret sauce to still use
+        // setTimeout after the time has expired, thats why we have a
+        // third param
+        function f(a, b, push) {
+          // check if the time has expired,
+          // after __animationDuration expires don't take anymore requests
+          if (this.timedOut && typeof(push) == "undefined") {
+            return 0;
+          } else {
+            // If push is there, never clear that interval
+            // so never add it to the registry
+            if (push) {
+              return oldSetTimeout(a,b);
+            } else {
+              return registered[ registered.length ] = oldSetTimeout(a,b);
+            }
+          }
+        }
+
+        f.clearAll = function() {
+          var r;
+
+          while (r = registered.pop()) {
+            clearTimeout( r );
+          }
+
+          this.timedOut = true;
+        };
+
+        f.timedOut = false;
+
+        return f;
+      }(window.setTimeout));
+
+      setTimeout(function() {
+
+        setTimeout.clearAll();
+        setInterval.clearAll();
+
+        // Stop Web Animations API
+        // Idea from Gregor: https://github.com/CodePen/CodePen-Bug-Reporting-Only/issues/173#issuecomment-203443301
+        // Status as of April 2020:
+        //  Chrome 80 = Stops animations
+        //  Firefox 75 = Stops animations
+        //  Safari 13 = Doesn't support WAAPI
+        //  Safari 13.1 = Stops animations
+
+        // Apparently this used to be done via `document.timeline`, but the modern method is to get the animations directly from the document.
+        let animations = ( typeof document.getAnimations === "function" && document.getAnimations() ) || (document.timeline && typeof document.timeline.getAnimations === "function" && document.timeline.getAnimations() )
+
+        if ( animations && animations.length ) {
+          animations.map(function(animation) {
+            animation.pause();
+          });
+        }
+
+      }, __animationDuration, "push");
+
+    }());
+  </script>
+
+</head>
+
+<body translate="no" onload="_l='t';">
+  <ul class="cards">
+  <li class="card card-1">
+    <div class="content">
+      <figure>
+        <img src="https://i1.sndcdn.com/artworks-000137479333-rpqogd-t500x500.jpg" alt="">
+      </figure>
+      <div class="meta">
+        <p class="song">Harder, Better, Faster, Stronger</p>
+        <p class="artist">Daft Punk</p>
+        <div class="extra">
+          <p class="album">Random Access Memories</p>
+          <p class="time">3:23</p>
+        </div>
+      </div>
+    </div>
+    <button class="delete-btn">
+      <img src="https://upload.wikimedia.org/wikipedia/commons/7/7d/Trash_font_awesome.svg" alt="close button">
+      <span class="sr-only">Delete</span>
+    </button>
+  </li>
+  <li class="card card-2">
+    <div class="content">
+      <figure>
+        <img src="https://upload.wikimedia.org/wikipedia/en/7/71/Get_Lucky.jpg" alt="">
+      </figure>
+      <div class="meta">
+        <p class="song">Get Lucky</p>
+        <p class="artist">Daft Punk</p>
+        <div class="extra">
+          <p class="album">Random Access Memories</p>
+          <p class="time">4:07</p>
+        </div>
+      </div>
+    </div>
+    <button class="delete-btn">
+      <img src="https://upload.wikimedia.org/wikipedia/commons/7/7d/Trash_font_awesome.svg" alt="close button">
+      <span class="sr-only">Delete</span>
+    </button>
+  </li>
+  <li class="card card-3">
+    <div class="content">
+      <figure>
+        <img src="https://upload.wikimedia.org/wikipedia/en/7/76/Primetimeofyourlife.jpg" alt="">
+      </figure>
+      <div class="meta">
+        <p class="song">Prime Time of Your Life</p>
+        <p class="artist">Daft Punk</p>
+        <div class="extra">
+          <p class="album">Human After All</p>
+          <p class="time">5:08</p>
+        </div>
+      </div>
+    </div>
+    <button class="delete-btn">
+      <img src="https://upload.wikimedia.org/wikipedia/commons/7/7d/Trash_font_awesome.svg" alt="close button">
+      <span class="sr-only">Delete</span>
+    </button>
+  </li>
+  <li class="card card-4">
+    <div class="content">
+      <figure>
+        <img src="https://i1.sndcdn.com/artworks-000088893185-mkpcvi-t500x500.jpg" alt="">
+      </figure>
+      <div class="meta">
+        <p class="song">One More Time</p>
+        <p class="artist">Daft Punk</p>
+        <div class="extra">
+          <p class="album">One More Time</p>
+          <p class="time">2:35</p>
+        </div>
+      </div>
+    </div>
+    <button class="delete-btn">
+      <img src="https://upload.wikimedia.org/wikipedia/commons/7/7d/Trash_font_awesome.svg" alt="close button">
+      <span class="sr-only">Delete</span>
+    </button>
+  </li>
+  <li class="card card-5">
+    <div class="content">
+      <figure>
+        <img src="https://i1.sndcdn.com/artworks-000655973617-9rv0tb-t500x500.jpg" alt="">
+      </figure>
+      <div class="meta">
+        <p class="song">Technologic</p>
+        <p class="artist">Daft Punk</p>
+        <div class="extra">
+          <p class="album">Human After All</p>
+          <p class="time">3:07</p>
+        </div>
+      </div>
+    </div>
+    <button class="delete-btn">
+      <img src="https://upload.wikimedia.org/wikipedia/commons/7/7d/Trash_font_awesome.svg" alt="close button">
+      <span class="sr-only">Delete</span>
+    </button>
+  </li>
+  <li class="card card-6">
+    <div class="content">
+      <figure>
+        <img src="https://upload.wikimedia.org/wikipedia/en/8/84/RobotRock.DaftPunk.single.jpg" alt="">
+      </figure>
+      <div class="meta">
+        <p class="song">Robot Rock</p>
+        <p class="artist">Daft Punk</p>
+        <div class="extra">
+          <p class="album">Human After All</p>
+          <p class="time">2:47</p>
+        </div>
+      </div>
+    </div>
+    <button class="delete-btn">
+      <img src="https://upload.wikimedia.org/wikipedia/commons/7/7d/Trash_font_awesome.svg" alt="close button">
+      <span class="sr-only">Delete</span>
+    </button>
+  </li>
+  <li class="card card-7">
+    <div class="content">
+      <figure>
+        <img src="https://upload.wikimedia.org/wikipedia/en/9/9c/Daftpunk-homework.jpg" alt="">
+      </figure>
+      <div class="meta">
+        <p class="song">Around the World</p>
+        <p class="artist">Daft Punk</p>
+        <div class="extra">
+          <p class="album">Homework</p>
+          <p class="time">3:07</p>
+        </div>
+      </div>
+    </div>
+    <button class="delete-btn">
+      <img src="https://upload.wikimedia.org/wikipedia/commons/7/7d/Trash_font_awesome.svg" alt="close button">
+      <span class="sr-only">Delete</span>
+    </button>
+  </li>
+  
+</ul>
+  
+      <script id="rendered-js" >
+document.querySelectorAll('.delete-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    if (document.startViewTransition) {
+      document.startViewTransition(() => {
+        btn.parentElement.remove();
+      });
+    } else {
+      btn.parentElement.remove();
+    }
+  });
+});
+//# sourceURL=pen.js
+    </script>
+
+    <script style="display: none !important;">
+  (function() {
+    var __animationDuration = 4000;
+
+    setTimeout(function() {
+      // If onload hasn't been called, stop all requests after 2 seconds
+      if (typeof(_l) == "undefined") {
+        if (window.stop !== undefined) window.stop();
+        else if (document.execCommand !== undefined) document.execCommand("Stop", false);
+      }
+    }, 2000, "push");
+
+    /*
+    * Capture and kill CSS animations after X number of seconds
+    */
+    function pauseAnimations() {
+      var body = document.getElementsByTagName("body")[0];
+
+      if (body.addEventListener) {
+        body.addEventListener("webkitAnimationStart", listener, false);
+        body.addEventListener("webkitAnimationIteration", listener, false);
+        body.addEventListener("animationstart", listener, false);
+        body.addEventListener("animationiteration", listener, false);
+      }
+    }
+
+    function listener(e) {
+
+      var targetEl;
+
+      if (e.type == "webkitAnimationStart" || e.type == "webkitAnimationIteration") {
+
+        targetEl = e.target;
+
+        setTimeout(function() {
+          targetEl.style.webkitAnimationPlayState = "paused";
+        }, __animationDuration, "push");
+
+      } else if (e.type == "animationstart" || e.type == "animationiteration") {
+
+        targetEl = e.target;
+
+        setTimeout(function() {
+          targetEl.style.MozAnimationPlayState = "paused";
+        }, __animationDuration, 'push');
+
+      }
+    }
+
+    pauseAnimations();
+
+    // Pause all audio elements, allow the audio/video
+    // elements to render before stopping them
+    function pauseElementTypes(type) {
+      for (var i = 0, els = document.getElementsByTagName(type); i < els.length; i++) {
+        els[i].pause();
+      }
+    }
+
+    // Wait until the elements have been created to pause them
+    setTimeout(function() {
+      pauseElementTypes("audio");
+      pauseElementTypes("video");
+    }, 100);
+
+  }());
+  </script>
+
+  <script src="https://cpwebassets.codepen.io/assets/editor/iframe/iframeRefreshCSS-44fe83e49b63affec96918c9af88c0d80b209a862cf87ac46bc933074b8c557d.js"></script>
+</body>
+
+</html>
